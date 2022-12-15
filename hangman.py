@@ -29,11 +29,11 @@ def generate_phrase(phrase_type):
     else:
         while True:
             try:
-                phrase = getpass.getpass("Input word or phrase: ").strip()
+                phrase = getpass.getpass("Input phrase: ").strip()
             except (EOFError, KeyboardInterrupt):
                 sys.exit()
-            if bool(re.search(r"[^a-zA-Z\.,\!?\"' ]", phrase)):
-                print("Word/phrase cannot contain numbers or any punctuation other than ,.?!")
+            if bool(re.search(r"[^a-zA-Z\.,\!?\"'& -]", phrase)):
+                print("Phrase cannot contain numbers or any punctuation other than ,.?!\"&'")
             elif len(phrase) == 0 or bool(re.search(r"[a-zA-z]", phrase)) == False:
                 continue
             else:
@@ -41,19 +41,17 @@ def generate_phrase(phrase_type):
 
 
 def random_phrase():
-    phrases = [
-        "Let's play hangman!",
-        "What up homie?",
-        "Zzyzx road is in California",
-        "Bet you can't guess this one"
-        ]
+    phrases = []
+    f = open("phrases.txt", "r")
+    for line in f:
+        phrases.append(line.strip().capitalize())
     return phrases[random.randint(0, (len(phrases) - 1))]
 
 
 def unpunctuate(s):
     unpunctuated = ""
     for char in s:
-        if bool(re.search(r"[\.,\!?\"']", char)):
+        if bool(re.search(r"[\.,\!?\"'&-]", char)):
             continue
         unpunctuated += char
     return unpunctuated
@@ -119,7 +117,7 @@ class Game:
 
     def lose(self):
         self.update_display()
-        print(f"The word/phrase was: {self.phrase}")
+        print(f"The phrase was: {self.phrase}")
         print("Sorry, you lost.\n\n", end="")
         sys.exit()
 
