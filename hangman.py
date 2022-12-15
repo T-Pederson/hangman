@@ -51,6 +51,11 @@ class Game:
     
     def __init__(self, phrase):
         self.phrase = phrase
+        self.unpunctuated_phrase = ""
+        for char in phrase:
+            if bool(re.search(r"[\.,\!?\"']", char)):
+                continue
+            self.unpunctuated_phrase += char.lower()
 
     def play_game(self):
         Game.update_display(self)
@@ -66,7 +71,11 @@ class Game:
                 continue
             except (EOFError, KeyboardInterrupt):
                 sys.exit()
-            if len(guess) != 1 or guess.isalpha() == False:
+            if guess == self.unpunctuated_phrase.lower():
+                for char in set(guess):
+                    self.correct_guesses.append(char)
+                Game.win(self)
+            elif len(guess) != 1 or guess.isalpha() == False:
                 print("Guess must be 1 letter")
             elif guess in self.incorrect_guesses or guess in self.correct_guesses:
                 print("Letter has already been guessed")
