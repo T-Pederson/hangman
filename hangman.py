@@ -11,6 +11,7 @@ def main():
     game.play_game()
 
 
+# Ask user for custom or random phrase to be guessed
 def set_phrase_type():
     while True:
         try:
@@ -23,6 +24,7 @@ def set_phrase_type():
             return phrase_type
 
 
+# Either generate a random phrase or format a phrase the user inputs based on phrase type chosen prior
 def generate_phrase(phrase_type):
     if phrase_type == "r":
         return random_phrase()
@@ -33,13 +35,16 @@ def generate_phrase(phrase_type):
             except (EOFError, KeyboardInterrupt):
                 sys.exit()
             if bool(re.search(r"[^a-zA-Z\.,\!?\"'& -]", phrase)):
-                print("Phrase cannot contain numbers or any punctuation other than ,.?!\"&'")
+                print(
+                    "Phrase cannot contain numbers or any punctuation other than ,.?!\"&'"
+                )
             elif len(phrase) == 0 or bool(re.search(r"[a-zA-z]", phrase)) == False:
                 continue
             else:
                 return phrase
 
 
+# Select a random phrase from the list of phrases in phrases.txt
 def random_phrase():
     phrases = []
     f = open("phrases.txt", "r")
@@ -48,6 +53,7 @@ def random_phrase():
     return phrases[random.randint(0, (len(phrases) - 1))]
 
 
+# Helper function to unpuncuate a phrase or guess when guessing an entire phrase
 def unpunctuate(s):
     unpunctuated = ""
     for char in s:
@@ -56,21 +62,27 @@ def unpunctuate(s):
         unpunctuated += char
     return unpunctuated
 
+
 class Game:
+    # Set up empty arrays to hold correct and incorrect guesses
     correct_guesses = []
     incorrect_guesses = []
-    
+
+    # Initialize the game function to include the phrase the user has chosen
     def __init__(self, phrase):
         self.phrase = phrase
         self.unpunctuated_phrase = unpunctuate(phrase)
 
+    # Display the initial hangman visual and start the game loop
     def play_game(self):
-        print('Let\'s play hangman! You can guess a letter or the complete phrase!')
+        print("Let's play hangman! You can guess a letter or the complete phrase!")
         self.update_display()
         while True:
             self.play_round()
 
+    # Request a guess from the user and check if the guess is correct or not
     def play_round(self):
+        # Keep looping through the guess prompt until a valid guess is given
         while True:
             try:
                 guess = input("Guess: ").lower()
@@ -79,7 +91,11 @@ class Game:
                 continue
             except (EOFError, KeyboardInterrupt):
                 sys.exit()
-            if unpunctuate(guess).lower() == self.unpunctuated_phrase.lower() or guess.lower() == self.phrase.lower():
+            # If the user guesses the whole phrase either with all punctuation or with no punctuation the user wins
+            if (
+                unpunctuate(guess).lower() == self.unpunctuated_phrase.lower()
+                or guess.lower() == self.phrase.lower()
+            ):
                 for char in set(guess):
                     self.correct_guesses.append(char)
                 self.win()
@@ -89,19 +105,23 @@ class Game:
                 print("Letter has already been guessed")
             else:
                 break
+        # Check if the guessed letter is correct or not and add it to the appropriate array
         if guess in set(self.phrase.lower()):
             self.correct_guesses.append(guess)
             print("Correct!")
         else:
             self.incorrect_guesses.append(guess)
             print("Incorrect!")
+        # Check if the user won, otherwise update the display
         self.check_win()
         self.update_display()
 
+    # Helper function to update the display with the hangman visual and the phrase
     def update_display(self):
         self.print_visual()
         self.print_phrase()
-    
+
+    # Check if the user has either lost or won, if neither keep the game loop going
     def check_win(self):
         if len(self.incorrect_guesses) == 6:
             self.lose()
@@ -109,18 +129,21 @@ class Game:
             if char.isalpha() and char.lower() not in self.correct_guesses:
                 return
         self.win()
-    
+
+    # If the user has won, end the game
     def win(self):
         self.update_display()
         print("Congratulations, you won!\n\n", end="")
         sys.exit()
 
+    # If the user has lost, display the phrase and end the game
     def lose(self):
         self.update_display()
         print(f"The phrase was: {self.phrase}")
         print("Sorry, you lost.\n\n", end="")
         sys.exit()
 
+    # Print the phrase, for each correctly guessed letter print the letter itself, otherwise print a placeholder "_"
     def print_phrase(self):
         for char in self.phrase:
             if char.isalpha() and char.lower() not in self.correct_guesses:
@@ -129,6 +152,7 @@ class Game:
                 print(char, end="")
         print("\n\n", end="")
 
+    # Print a hangman visual based on how many incorrect guesses the user currently has
     def print_visual(self):
         match len(self.incorrect_guesses):
             case 0:
