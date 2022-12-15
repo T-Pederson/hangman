@@ -17,6 +17,8 @@ def set_players():
         except ValueError:
             print("Please input 1 or 2")
             continue
+        except (EOFError, KeyboardInterrupt):
+            sys.exit()
         if number_of_players != 1 and number_of_players != 2:
             print("Please input 1 or 2")
         else:
@@ -28,7 +30,10 @@ def generate_phrase(number_of_players):
         return "This is hangman"
     else:
         while True:
-            phrase = input("Input word or phrase: ")
+            try:
+                phrase = input("Input word or phrase: ")
+            except (EOFError, KeyboardInterrupt):
+                sys.exit()
             if bool(re.search(r"[^a-zA-Z\.,\!? ]", phrase)):
                 print("Word/phrase cannot contain numbers or any punctuation other than ,.?!")
             elif len(phrase) == 0 or bool(re.search(r"[a-zA-z]", phrase)) == False:
@@ -57,6 +62,8 @@ class Game:
             except ValueError:
                 print("Guess must be 1 letter")
                 continue
+            except (EOFError, KeyboardInterrupt):
+                sys.exit()
             if len(guess) != 1 or guess.isalpha() == False:
                 print("Guess must be 1 letter")
             elif guess in self.incorrect_guesses or guess in self.correct_guesses:
@@ -84,13 +91,13 @@ class Game:
     
     def win(self):
         Game.update_display(self)
-        print("Congratulations, you won!")
+        print("Congratulations, you won!\n\n", end="")
         sys.exit()
 
     def lose(self):
         Game.update_display(self)
         print(f"The word/phrase was: {self.phrase}")
-        print("Sorry, you lost.")
+        print("Sorry, you lost.\n\n", end="")
         sys.exit()
 
     def print_phrase(self):
