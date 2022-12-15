@@ -41,9 +41,22 @@ def generate_phrase(phrase_type):
 
 
 def random_phrase():
-    phrases = ["Let's play hangman!", "What up homie?", "Zzyzx road is in California", "Bet you can't guess this one"]
+    phrases = [
+        "Let's play hangman!",
+        "What up homie?",
+        "Zzyzx road is in California",
+        "Bet you can't guess this one"
+        ]
     return phrases[random.randint(0, (len(phrases) - 1))]
 
+
+def unpunctuate(s):
+    unpunctuated = ""
+    for char in s:
+        if bool(re.search(r"[\.,\!?\"']", char)):
+            continue
+        unpunctuated += char
+    return unpunctuated
 
 class Game:
     correct_guesses = []
@@ -51,16 +64,13 @@ class Game:
     
     def __init__(self, phrase):
         self.phrase = phrase
-        self.unpunctuated_phrase = ""
-        for char in phrase:
-            if bool(re.search(r"[\.,\!?\"']", char)):
-                continue
-            self.unpunctuated_phrase += char.lower()
+        self.unpunctuated_phrase = unpunctuate(phrase)
 
     def play_game(self):
-        Game.update_display(self)
+        print('Let\'s play hangman! You can guess a letter or the complete phrase!')
+        self.update_display()
         while True:
-            Game.play_round(self)
+            self.play_round()
 
     def play_round(self):
         while True:
@@ -71,10 +81,10 @@ class Game:
                 continue
             except (EOFError, KeyboardInterrupt):
                 sys.exit()
-            if guess == self.unpunctuated_phrase.lower():
+            if unpunctuate(guess).lower() == self.unpunctuated_phrase.lower() or guess.lower() == self.phrase.lower():
                 for char in set(guess):
                     self.correct_guesses.append(char)
-                Game.win(self)
+                self.win()
             elif len(guess) != 1 or guess.isalpha() == False:
                 print("Guess must be 1 letter")
             elif guess in self.incorrect_guesses or guess in self.correct_guesses:
@@ -87,28 +97,28 @@ class Game:
         else:
             self.incorrect_guesses.append(guess)
             print("Incorrect!")
-        Game.check_win(self)
-        Game.update_display(self)
+        self.check_win()
+        self.update_display()
 
     def update_display(self):
-        Game.print_visual(self)
-        Game.print_phrase(self)
+        self.print_visual()
+        self.print_phrase()
     
     def check_win(self):
         if len(self.incorrect_guesses) == 6:
-            Game.lose(self)
+            self.lose()
         for char in set(self.phrase):
             if char.isalpha() and char.lower() not in self.correct_guesses:
                 return
-        Game.win(self)
+        self.win()
     
     def win(self):
-        Game.update_display(self)
+        self.update_display()
         print("Congratulations, you won!\n\n", end="")
         sys.exit()
 
     def lose(self):
-        Game.update_display(self)
+        self.update_display()
         print(f"The word/phrase was: {self.phrase}")
         print("Sorry, you lost.\n\n", end="")
         sys.exit()
