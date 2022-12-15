@@ -1,53 +1,55 @@
 import sys
 import re
+import getpass
+import random
 
 
 def main():
-    number_of_players = set_players()
-    phrase = generate_phrase(number_of_players)
-    game = Game(number_of_players, phrase)
+    phrase_type = set_phrase_type()
+    phrase = generate_phrase(phrase_type)
+    game = Game(phrase)
     game.play_game()
 
 
-def set_players():
-    number_of_players = 0
+def set_phrase_type():
     while True:
         try:
-            number_of_players = int(input("Number of players (1 or 2): "))
-        except ValueError:
-            print("Please input 1 or 2")
-            continue
+            phrase_type = input("Custom or random phrase (c/r)?: ").lower().strip()
         except (EOFError, KeyboardInterrupt):
             sys.exit()
-        if number_of_players != 1 and number_of_players != 2:
-            print("Please input 1 or 2")
+        if phrase_type != "c" and phrase_type != "r":
+            print("Please input c or r")
         else:
-            return number_of_players
+            return phrase_type
 
 
-def generate_phrase(number_of_players):
-    if number_of_players == 1:
-        return "This is hangman"
+def generate_phrase(phrase_type):
+    if phrase_type == "r":
+        return random_phrase()
     else:
         while True:
             try:
-                phrase = input("Input word or phrase: ")
+                phrase = getpass.getpass("Input word or phrase: ").strip()
             except (EOFError, KeyboardInterrupt):
                 sys.exit()
-            if bool(re.search(r"[^a-zA-Z\.,\!? ]", phrase)):
+            if bool(re.search(r"[^a-zA-Z\.,\!?\"' ]", phrase)):
                 print("Word/phrase cannot contain numbers or any punctuation other than ,.?!")
             elif len(phrase) == 0 or bool(re.search(r"[a-zA-z]", phrase)) == False:
                 continue
             else:
-                return phrase.strip()
+                return phrase
+
+
+def random_phrase():
+    phrases = ["Let's play hangman!", "What up homie?", "Zzyzx road is in California", "Bet you can't guess this one"]
+    return phrases[random.randint(0, (len(phrases) - 1))]
 
 
 class Game:
     correct_guesses = []
     incorrect_guesses = []
     
-    def __init__(self, number_of_players, phrase):
-        self.number_of_players = number_of_players
+    def __init__(self, phrase):
         self.phrase = phrase
 
     def play_game(self):
@@ -72,8 +74,10 @@ class Game:
                 break
         if guess in set(self.phrase.lower()):
             self.correct_guesses.append(guess)
+            print("Correct!")
         else:
             self.incorrect_guesses.append(guess)
+            print("Incorrect!")
         Game.check_win(self)
         Game.update_display(self)
 
