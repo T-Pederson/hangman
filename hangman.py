@@ -147,9 +147,9 @@ class Game:
     def print_phrase(self):
         for char in self.phrase:
             if char.isalpha() and char.lower() not in self.correct_guesses:
-                print("_", end="")
+                print("_ ", end="")
             else:
-                print(char, end="")
+                print(char + " ", end="")
         print("\n\n", end="")
 
     # Print a hangman visual based on how many incorrect guesses the user currently has
